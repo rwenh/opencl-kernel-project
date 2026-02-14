@@ -13,21 +13,22 @@ else()
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g") # set debugging flags
 
-add_executable(${PROJECT_NAME}
-        src/main.cpp
-        src/main.cpp
-) # create exec
+# collect all source files
+file(GLOB_RECURSE SOURCES "src/*.cpp")
+file(GLOB_RECURSE HEADERS "include/*.hpp")
+
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS}
+        src/opencl_wrapper/buffer.cpp)
 
 target_link_libraries(${PROJECT_NAME}
         PRIVATE
         OpenCL::OpenCL
-) # link opencl
+)
 
+# make include directory available to all source files
 target_include_directories(${PROJECT_NAME}
         PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
-

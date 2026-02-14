@@ -1,0 +1,3 @@
+namespace semantic_analyzer {
+
+}
