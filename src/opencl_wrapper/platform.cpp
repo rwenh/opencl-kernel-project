@@ -48,7 +48,6 @@ namespace platform {
             return std::vector<cl_device_id>();
         }
 
-        // Allocate vector and get device IDs
         std::vector<cl_device_id> devices(num_devices);
         error = clGetDeviceIDs(platform, type, num_devices, devices.data(), nullptr);
         check_cl_error(error, "Failed to get device IDs");
