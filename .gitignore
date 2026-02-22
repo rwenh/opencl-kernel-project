@@ -45,4 +45,5 @@ cmake-build-debug/
 cmake-build-release/
 
 # ide files
-.idea/
+.idea/.settings/
+build/
