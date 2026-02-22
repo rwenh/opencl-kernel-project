@@ -1,3 +1,0 @@
-/home/cody/fundamentals/efforts/opencl-kernel-project/build/CMakeFiles/MyOpenCLProject.dir
-/home/cody/fundamentals/efforts/opencl-kernel-project/build/CMakeFiles/edit_cache.dir
-/home/cody/fundamentals/efforts/opencl-kernel-project/build/CMakeFiles/rebuild_cache.dir
