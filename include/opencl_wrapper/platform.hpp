@@ -82,7 +82,7 @@ inline std::string get_device_info_str(cl_device_id device,
                                        cl_device_info param) {
   size_t size = 0;
   clGetDeviceInfo(device, param, 0, nullptr, &size);
-  std::string result(size, '\]0');
+  std::string result(size, '\0');
   clGetDeviceInfo(device, param, size, result.data(), nullptr);
   if (!result.empty() && result.back() == '\0')
     result.pop_back();
