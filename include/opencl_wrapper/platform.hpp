@@ -4,7 +4,7 @@
 #include <iostream>
 #include <ostream>
 #include <stdexcept>
-#include <string>
+#include <string.h>
 #include <vector>
 
 namespace platform {
