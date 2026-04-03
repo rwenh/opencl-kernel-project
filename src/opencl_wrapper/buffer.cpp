@@ -64,6 +64,80 @@ Buffer &Buffer::operator=(Buffer &&o) noexcept{
  * Sub-buffer view
  * -------------------------------------------------------------------------------------------------------------------------------------------------------------
  */
-
- */
+ Buffer Buffer :: sub_buffer(size_t origin, size_t size, cl_mem_flags flags) const {
+ cl_buffer_region region{origin, size};
+ cl_int err=CL_SUCCESS;
+ Buffer sub;
+ sub.handle=clCreateSubBuffer(handle, flags, CL_BUFFER_CREATE_TYPE_REGION, &region, &err);
+ check(err, "clCreateSubBuffer");
+ sub.byte_size = size;
+ return sub;
+ }
+ /*----------------------------------------------------------------------------------------------------------------------------------------------------------
+  * Blocking Transfers
+  * _________________________________________________________________________________________*/
+void Buffer::write(cl_command_queue queue, const void *data, size_t size, size_t offset) const {
+	if(size==0)
+		size=byte_size;
+	check(clEnqueueWriteBuffer(queue, handle , CL_TRUE,offset,size,data,0,nullptr,nullptr),
+			"clEnqueueWriteBuffer");
 }
+void Buffer::read(cl_command_queue queue, void *data, size_t size, size_t offset)const{
+	if(size==0)size=byte_size;
+	check(clEnqueueReadBuffer(queue, handle, CL_TRUE,offset,size,data,0, nullptr, nullptr),"clEnqueueReadBuffer");
+}
+
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ * Async transfers
+ * ------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ */
+cl_event Buffer::write_async(cl_command_queue queue, const void *data, size_t size, size_t offset, const std::vector<cl_event> &wait_list) const{
+	if(size ==0)size=byte_size;
+	cl_event ev= nullptr;
+	check(clEnqueueWriteBuffer(queue, handle, CL_FALSE, offset, size, data, static_cast<cl_uint>(wait_list.size()), wait_list.empty()?nullptr:wait_list.data(), &ev),
+			"clEnqueueWriteBufferasync");
+	return ev;
+}
+cl_event Buffer::read_async(cl_command_queue queue, void *data, size_t size, size_t offset, const std::vector<cl_event> &wait_list)const{
+	if(size==0)
+		size= byte_size;
+	cl_event ev= nullptr;
+	check(clEnqueueReadBuffer(queue, handle,CL_FALSE,offset,size,data, static_cast<cl_uint>(wait_list.size()), wait_list.empty()? nullptr:wait_list.data(), &ev),
+			"clEnqueueReadBuffer async");
+	return ev;
+}
+/*---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ * Device side copy
+ * __________________________________________________________________________________________________
+ */
+void Buffer::copy_to (cl_command_queue queue, const Buffer &dst, size_t size,size_t src_offset, size_t dst_offset)const{
+	if (size==0)
+		size=byte_size;
+	check(clEnqueueCopyBuffer(queue,handle, dst.handle, src_offset,dst_offset, size, 0, nullptr, nullptr),
+			"clEnqueueCopyBuffer");
+}
+/*------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ * Map/Unmap
+ * -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ */
+void *Buffer::map(cl_command_queue queue, cl_map_flags flags, size_t offset , size_t size) const{
+	if(size==0)size=byte_size;
+	cl_int err=CL_SUCCESS;
+	void *ptr=clEnqueueMapBuffer(queue, handle, CL_TRUE, flags, offset, size,0, nullptr, nullptr, &err);
+	check(err, "clEnqueueMapBuffer");
+	return ptr;
+}
+void Buffer::unmap(cl_command_queue queue, void *ptr)const {
+	check(clEnqueueUnmapMemObject(queue, handle, ptr, 0 , nullptr, nullptr),"clEnqueueUnmapMemObject");
+}
+/*_______________________________________________________________________________________________________________
+ * Free function:fill(non template overload)
+ * ___________________________________________________________________________________________________________________
+ */
+void fill(cl_command_queue queue, const Buffer &buf,
+		const void *pattern, size_t pattern_size, size_t offset,size_t size){
+	if (size==0)size=buf.size();
+	check(clEnqueueFillBuffer(queue, buf.handle, pattern, pattern_size, offset, size, 0, nullptr, nullptr),"clEnqueueFillBuffer");
+}
+
+} //namespace Buffer
