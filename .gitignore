@@ -48,3 +48,6 @@ cmake-build-release/
 .idea/.settings/
 build/
 .settings/
+.cache/
+.cproject
+.project
